@@ -107,7 +107,9 @@ def ensure_schema():
         except Exception:
             pass
     
-    # Cleanup legacy/invalid data (best-effort)
+    # Cleanup legacy/invalid data (best-effort).
+    # On serverless platforms like Vercel, doing heavy VACUUM on every cold start
+    # adds a lot of latency, so we keep this lightweight.
     try:
         db.executescript(
             """
@@ -115,7 +117,6 @@ def ensure_schema():
             DELETE FROM follows WHERE follower_id IS NULL OR followed_id IS NULL;
             DELETE FROM comments WHERE author_id IS NULL OR author_id = 0;
             DELETE FROM posts WHERE author_id IS NULL OR author_id = 0;
-            VACUUM;
             """
         )
     except Exception:

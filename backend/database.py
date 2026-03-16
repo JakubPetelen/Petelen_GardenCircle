@@ -19,6 +19,17 @@ def get_db():
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         db = g._database = sqlite3.connect(DB_PATH)
         db.row_factory = sqlite3.Row
+
+        # Enable pragmatic performance tweaks for SQLite.
+        # These are safe for a single-writer, low-concurrency app like this.
+        try:
+            db.execute("PRAGMA journal_mode=WAL;")
+            db.execute("PRAGMA synchronous=NORMAL;")
+            db.execute("PRAGMA foreign_keys=ON;")
+            db.execute("PRAGMA cache_size=-8000;")  # ~8MB cache
+        except Exception:
+            # If any pragma fails (e.g. on older SQLite), just continue.
+            pass
     return db
 
 
