@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, jsonify, session, send_from_directory, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 from .database import get_db
@@ -29,15 +29,18 @@ def register_routes(app):
     # Core security/session config
     app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
-    # Make session cookies stable and compatible across environments
+    # Make session + remember-me cookies stable and compatible across environments
     app.config.update(
         SESSION_COOKIE_NAME="gardencircle_session",
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        # Do NOT force Secure so cookies also work if the app is proxied
-        # or accessed via http in some environments.
         SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_PATH="/",
+        REMEMBER_COOKIE_NAME="gardencircle_remember",
+        REMEMBER_COOKIE_HTTPONLY=True,
+        REMEMBER_COOKIE_SAMESITE="Lax",
+        REMEMBER_COOKIE_SECURE=False,
+        REMEMBER_COOKIE_DURATION=timedelta(days=30),
     )
 
     # Configure file upload settings
@@ -65,7 +68,7 @@ def register_routes(app):
             
             user = User.get_by_username(username)
             if user and user.check_password(password):
-                login_user(user)
+                login_user(user, remember=True, duration=timedelta(days=30))
                 return redirect(url_for('posts_page'))
             else:
                 return render_template("login.html", error="Nesprávne prihlasovacie údaje")
@@ -101,7 +104,7 @@ def register_routes(app):
             user_id = User.create(username, email, password)
             if user_id:
                 user = User.get_by_id(user_id)
-                login_user(user)
+                login_user(user, remember=True, duration=timedelta(days=30))
                 return redirect(url_for('posts_page'))
             else:
                 return render_template("register.html", error="Registrácia zlyhala")
