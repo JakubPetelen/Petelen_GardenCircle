@@ -25,15 +25,27 @@ def load_user(user_id):
 
 def register_routes(app):
     login_manager.init_app(app)
+
+    # Core security/session config
     app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
-    
+
+    # Make session cookies stable on Vercel and in browsers
+    is_vercel = bool(os.environ.get("VERCEL"))
+    app.config.update(
+        SESSION_COOKIE_NAME="gardencircle_session",
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        # On Vercel we always run behind HTTPS, so mark cookies as secure there
+        SESSION_COOKIE_SECURE=is_vercel,
+    )
+
     # Configure file upload settings
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
     if os.environ.get("VERCEL"):
         app.config['UPLOAD_FOLDER'] = os.path.join("/tmp", "uploads")
     else:
         app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "uploads"))
-    
+
     upload_dir = app.config['UPLOAD_FOLDER']
     os.makedirs(upload_dir, exist_ok=True)
 
