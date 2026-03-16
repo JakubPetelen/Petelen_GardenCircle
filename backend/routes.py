@@ -29,14 +29,15 @@ def register_routes(app):
     # Core security/session config
     app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
-    # Make session cookies stable on Vercel and in browsers
-    is_vercel = bool(os.environ.get("VERCEL"))
+    # Make session cookies stable and compatible across environments
     app.config.update(
         SESSION_COOKIE_NAME="gardencircle_session",
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        # On Vercel we always run behind HTTPS, so mark cookies as secure there
-        SESSION_COOKIE_SECURE=is_vercel,
+        # Do NOT force Secure so cookies also work if the app is proxied
+        # or accessed via http in some environments.
+        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_PATH="/",
     )
 
     # Configure file upload settings
