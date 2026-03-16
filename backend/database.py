@@ -3,7 +3,14 @@ import sqlite3
 from flask import g
 
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "gardencircle.db")
+def _default_db_path() -> str:
+    # Vercel's filesystem is read-only except for /tmp.
+    if os.environ.get("VERCEL"):
+        return os.path.join("/tmp", "gardencircle.db")
+    return os.path.join(os.path.dirname(__file__), "gardencircle.db")
+
+
+DB_PATH = os.environ.get("DB_PATH", _default_db_path())
 
 
 def get_db():

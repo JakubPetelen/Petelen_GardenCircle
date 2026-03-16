@@ -29,7 +29,10 @@ def register_routes(app):
     
     # Configure file upload settings
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
-    app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "uploads"))
+    if os.environ.get("VERCEL"):
+        app.config['UPLOAD_FOLDER'] = os.path.join("/tmp", "uploads")
+    else:
+        app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "uploads"))
     
     upload_dir = app.config['UPLOAD_FOLDER']
     os.makedirs(upload_dir, exist_ok=True)

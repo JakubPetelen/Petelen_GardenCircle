@@ -8,7 +8,11 @@ from .models import ensure_schema
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__, static_folder="../static", template_folder="../templates")
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_STATIC_DIR = os.path.join(_PROJECT_ROOT, "static")
+_TEMPLATES_DIR = os.path.join(_PROJECT_ROOT, "templates")
+
+app = Flask(__name__, static_folder=_STATIC_DIR, template_folder=_TEMPLATES_DIR)
 
 
 @app.route("/")

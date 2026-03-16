@@ -1,0 +1,12 @@
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/gardencircle.db
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+
